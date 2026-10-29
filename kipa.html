@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>kipa</title>
+<style>
+:root{--bg1:#7b2fbe;--bg2:#d62fb0;--bg3:#ff2a85;--ink:#fff;--card:rgba(0,0,0,.35);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#fff}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(135deg,var(--bg1),var(--bg2) 50%,var(--bg3));display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center}
+.phone{position:relative;aspect-ratio:9/16;height:min(700px,calc(100% - 64px));max-width:100vw;background:#111;border-radius:10px;overflow:hidden;box-shadow:0 10px 40px rgba(60,0,80,.45)}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}.screen.on{display:flex}
+/* setup */
+#setup{align-items:center;justify-content:center;gap:14px;padding:28px;background:linear-gradient(160deg,#2a0f3d,#5a1450 60%,#8a1b55)}
+#setup h1{font-size:52px;margin:0;letter-spacing:-2px;font-style:italic;background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf);-webkit-background-clip:text;background-clip:text;color:transparent}
+#setup p{margin:0 0 6px;opacity:.7;font-size:13px}
+.pic{width:110px;height:110px;border-radius:50%;border:3px solid #fff3;object-fit:cover;background:#fff2;cursor:pointer}
+input[type=text],select{width:100%;padding:13px 16px;border-radius:12px;border:1px solid #fff3;background:#0006;color:#fff;font-size:15px;outline:none}
+select option{color:#000}
+.btn{width:100%;padding:14px;border:0;border-radius:12px;font-weight:700;font-size:16px;color:#fff;background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af);cursor:pointer}
+.lnk{background:none;border:0;color:#fffb;font-size:13px;cursor:pointer;text-decoration:underline}
+/* live */
+#live{background:#111}
+#bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:radial-gradient(circle at 50% 45%,rgba(215,160,210,.4),rgba(10,5,15,.8) 80%),conic-gradient(#2c2433 25%,#43394d 0 50%,#2c2433 0 75%,#43394d 0) 0 0/30px 30px}
+.top{position:absolute;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 8px;display:flex;align-items:center;gap:8px;background:linear-gradient(#0008,transparent);z-index:3}
+.top img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid #fff6}
+.top b{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{background:#e91e8c;font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.5px}
+.eye{display:flex;align-items:center;gap:4px;background:#0006;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600}
+.x{font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
+#chat{position:absolute;left:12px;right:70px;bottom:68px;display:flex;flex-direction:column;gap:13px;z-index:3;pointer-events:none}
+.c{display:flex;gap:9px;align-items:center;animation:in .3s ease;text-shadow:0 1px 3px #000a}
+.c img{width:30px;height:30px;object-fit:cover;border-radius:50%;flex:none}
+.c .n{font-size:12.5px;font-weight:600;opacity:.95}.c .t{font-size:13px;word-break:break-word}
+.c.sys .t{opacity:.8;font-style:italic}.c.me .n{color:#ffd3ea}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+#hearts{position:absolute;right:10px;bottom:70px;width:50px;top:40%;pointer-events:none;z-index:3;overflow:hidden}
+.h{position:absolute;bottom:0;display:flex;animation:fl 3.2s ease-out forwards}
+@keyframes fl{to{transform:translate(var(--dx),-300px) scale(1.2);opacity:0}}
+.bar{position:absolute;left:0;right:0;bottom:0;padding:10px 14px calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;align-items:center;z-index:4}
+.pill{flex:1;display:flex;align-items:center;border:1.5px solid #fff;border-radius:24px;padding:0 12px 0 16px}.pill input{flex:1;min-width:0;padding:10px 0;border:0;background:transparent;color:#fff;font-size:14px;font-weight:700;outline:none}
+.bar input::placeholder{color:#fff}
+.ic{display:flex;cursor:pointer;user-select:none}
+/* narrator panel */
+#ctl{display:none;width:min(360px,100vw);padding:0 10px;gap:6px;height:38px}#ctl.on{display:flex}
+#ctl input{min-width:0;flex:1;padding:8px 12px;border-radius:10px;border:0;background:#0007;color:#fff;font-size:12.5px;outline:none}
+#ctl button{border:0;border-radius:10px;background:#0007;color:#fff;padding:0 10px;font-size:15px;cursor:pointer}
+#ctl button.rec{background:#e1306c}
+</style></head><body>
+<div class="phone">
+ <div class="screen on" id="setup">
+  <h1>kipa</h1><p id="st">fake live simulator</p>
+  <img class="pic" id="pp" alt="profile" title="Add profile picture">
+  <input type="file" id="file" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+  <button class="lnk" id="pick">Add profile picture</button>
+  <input type="text" id="un" maxlength="30" placeholder="Username" autocomplete="off">
+  <button class="lnk" id="bpick">Add photos for bots (optional)</button><input type="file" id="bfile" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"><select id="spd"><option value="1">Viewer growth: Normal (+3–100)</option><option value="1000">Viral (×1,000)</option><option value="1000000">Mega (×1,000,000)</option></select>
+  <button class="btn" id="go">Go Live</button>
+ </div>
+ <div class="screen" id="live">
+  <video id="bg" autoplay muted playsinline></video>
+  <div class="top"><img id="tpp" alt=""><b id="tun"></b><span class="badge">LIVE</span><span class="eye"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg><span id="vc">0</span></span><span class="x" id="end">✕</span></div>
+  
+  <div id="chat"></div><div id="hearts"></div>
+  <div class="bar"><div class="pill"><input id="cm" placeholder="Comment" autocomplete="off"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="4" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="20" r="2.2"/></svg></div><span class="ic" id="snd"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M22 3 2 10.5l7.5 2.2L11.8 21l3.4-6.6L22 3z"/><path d="M9.5 12.7 22 3"/></svg></span><span class="ic" id="hrt"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0112 6.6a4.7 4.7 0 018.5 2.6c0 5.800-8.500 11.300-8.500 11.300z"/></svg></span></div>
+ </div>
+</div>
+<div id="ctl"><input id="say" placeholder="What's happening? (bots react)" autocomplete="off"><button id="mic" title="Microphone">🎤</button><button id="cam" title="Camera">📷</button><button id="scr" title="Share screen">🖥️</button></div>
+<script>
+const $=id=>document.getElementById(id),R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,P=a=>a[R(0,a.length-1)];
+let me={name:'',pic:''};
+const defPic=()=>av('me'+Date.now(),'person');
+try{const s=JSON.parse(localStorage.getItem('kipa')||'null');if(s){me=s}}catch(e){}
+$('un').value=me.name||'';
+$('pp').onclick=$('pick').onclick=()=>$('file').click();
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d'),m=Math.min(i.width,i.height);x.drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,160,160);me.pic=c.toDataURL('image/jpeg',.85);$('pp').src=me.pic};i.src=r.result};r.readAsDataURL(f)};
+/* avatars */
+const H=()=>`hsl(${R(0,360)},${R(40,80)}%,${R(35,70)}%)`;
+function av(seed,type){
+ type=type||P(['person','person','anime','anime','emoji','emoji','cat']);
+ const bg=H(),bg2=H();let b='';
+ if(type==='person'){const sk=P(['#f5d0b0','#e0ac84','#c68863','#8d5a3b','#ffe0c8']),hr=P(['#2b1b12','#5a3825','#d9b36a','#111','#a33']);
+  b=`<ellipse cx="50" cy="104" rx="38" ry="30" fill="${H()}"/><rect x="43" y="62" width="14" height="16" fill="${sk}"/><ellipse cx="50" cy="45" rx="19" ry="23" fill="${sk}"/><path d="M30 44q-2-26 20-26t20 26q-8-14-20-13t-20 13z" fill="${hr}"/><circle cx="43" cy="47" r="2" fill="#222"/><circle cx="57" cy="47" r="2" fill="#222"/><path d="M44 57q6 5 12 0" stroke="#7a3b3b" stroke-width="2" fill="none"/>`}
+ else if(type==='anime'){const hr=P(['#f48fb1','#7e57c2','#4fc3f7','#ffd54f','#222','#ef5350','#81c784']),ey=P(['#2196f3','#e91e63','#4caf50','#9c27b0','#ff9800']);
+  b=`<path d="M18 80q-8-60 32-62t32 62q-6-30-32-26T18 80z" fill="${hr}"/><ellipse cx="50" cy="55" rx="24" ry="27" fill="#ffe6d5"/><path d="M26 50q4-24 24-26t24 26q-14-8-24-6t-24 6z" fill="${hr}"/>${[38,62].map(x=>`<ellipse cx="${x}" cy="58" rx="6.5" ry="9" fill="#fff" stroke="#333"/><ellipse cx="${x}" cy="60" rx="5" ry="7.5" fill="${ey}"/><circle cx="${x-2}" cy="56" r="2.2" fill="#fff"/>`).join('')}<ellipse cx="33" cy="70" rx="4" ry="2" fill="#ff9aa2" opacity=".7"/><ellipse cx="67" cy="70" rx="4" ry="2" fill="#ff9aa2" opacity=".7"/><path d="M45 74q5 4 10 0" stroke="#a55" stroke-width="1.8" fill="none"/>`}
+ else if(type==='cat'){const f=P(['#f0a65a','#999','#eee','#333','#d7a96b']);
+  b=`<path d="M22 40l6-26 20 14zM78 40l-6-26-20 14z" fill="${f}"/><ellipse cx="50" cy="58" rx="32" ry="28" fill="${f}"/><circle cx="39" cy="54" r="4" fill="#222"/><circle cx="61" cy="54" r="4" fill="#222"/><path d="M46 64l4 3 4-3z" fill="#e88"/><path d="M50 67q-5 6-9 3M50 67q5 6 9 3" stroke="#222" fill="none"/>`}
+ else{const e=P(['😎','🔥','💀','🦊','🐸','🌸','⚡','👑','🎮','🍕','🐼','🌙','😈','🦄','💜','🏀','🎧','🌊']);b=`<text x="50" y="68" font-size="52" text-anchor="middle">${e}</text>`}
+ const s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${bg}"/><stop offset="1" stop-color="${bg2}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/>${b}</svg>`;
+ return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s)}
+/* usernames */
+const W1=['xo','sunny','lil','big','its','real','the','not','mr','miss','dark','cool','pixel','neo','sleepy','moon','ayy','kawaii','baby','king','queen','daily','fit','crazy','chill'],W2=['wolf','tiger','vibes','gamer','panda','queen','kid','boy','girl','bean','ninja','cakes','fox','cloud','sky','nova','mochi','storm','witch','dude','soul','lover','pop','star','snap'];
+function uname(){const t=R(1,10);let n;
+ if(t<=3){n='';for(let i=0;i<4;i++)n+=String.fromCharCode(R(97,122))}
+ else{const s=P(['_','.','','_']);n=P(W1)+s+P(W2)+(R(0,2)?P([R(1,99),R(100,9999),'x','_'+R(1,9),'']):'');if(R(0,5)===0)n+='_'+P(W2)}
+ return n.slice(0,20)}
+let botPics=[],bots=[];function mkBots(){bots=Array.from({length:70},()=>({n:uname(),a:botPics.length&&R(0,9)<9?P(botPics):av()}))}mkBots();
+$('bpick').onclick=()=>$('bfile').click();
+$('bfile').onchange=e=>{[...e.target.files].forEach(f=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),m=Math.min(i.width,i.height);x.drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,96,96);botPics.push(c.toDataURL('image/jpeg',.8));$('bpick').textContent=botPics.length+' bot photos added (tap to add more)'};i.src=r.result};r.readAsDataURL(f)})};
+if(!me.pic)me.pic=defPic();$('pp').src=me.pic;
+/* reactions */
+const T={
+ hi:[/\b(hi|hey|hello|yo|sup|welcome|good (morning|evening|night))\b/i,['hiii {n}!!','hey!! 👋','hello from {c}','yooo what\'s up','hi hi hi 😍','first time here, hi!!']],
+ q:[/\?|\b(what|why|how|who|where|when|should|can i|do you)\b/i,['wait what do you mean?','good question lol','omg i was wondering that too','can u explain again?','i think yes?','answer pls 🙏']],
+ game:[/\b(game|gaming|play|playing|level|boss|win|lose|ranked|fortnite|minecraft|valorant|roblox|fifa|cod|stream)\b/i,['LETS GOOO 🔥🔥','that play was insane','bro is cracked','nooo how did u miss that','gg gg','clutch!!','this lobby is cooked 💀','skill issue lol']],
+ food:[/\b(eat|eating|food|cook|cooking|pizza|burger|hungry|dinner|lunch|breakfast|coffee|snack|cake|recipe|taste)\b/i,['omg that looks so good 😭','now i\'m hungry','recipe pls!!','what\'s in it?','i need that rn','chef!! 👨‍🍳','pls save me a plate']],
+ music:[/\b(song|sing|singing|music|dance|dancing|beat|guitar|piano|rap|playlist|vibe)\b/i,['this song is a BANGER 🎶','your voice 😍','play it again!','what\'s the song called?','i\'m dancing in my room lol','ok this slaps','encore!!']],
+ funny:[/\b(lol|lmao|haha|funny|joke|laugh|crazy|wild|insane|omg|bruh|dead|prank)\b/i,['LMAOOO 😂😂','i\'m crying 💀','bro what 😭','stoppp 😭😭','dead 💀','HAHAHA','this is sending me','no way that just happened']],
+ sad:[/\b(sad|cry|crying|miss|sorry|tired|sick|bad day|stress|lonely|hurt)\b/i,['sending love 💜','u got this!!','hugs 🫂','we\'re here for u','stay strong ❤️','take your time','proud of u']],
+ thanks:[/\b(thank|thanks|love you|appreciate|shoutout|shout out|follow|subscribe|support)\b/i,['we love u too!! ❤️','just followed!!','shoutout pls 🙏','best streamer fr','following rn','ur the best 🥹']],
+ show:[/\b(look|show|see|check|screen|watch|here|this|new|try|open|click|scroll|phone|app)\b/i,['wait go back','can u zoom in?','i can\'t see it properly','omg that\'s cool','scroll up a bit','what is that??','ohhh i see it now','is it new?']],
+ bye:[/\b(bye|goodbye|going|end|ending|leaving|later|night|stop|last)\b/i,['nooo don\'t go 😭','already?? ','bye bye!! love u','goodnight!! 🌙','come back soon pls','ending so soon?']],
+ gen:[/./,['omg yes','facts 💯','wait really?','lol true','ok ok i see','😍😍','love this','fr fr','that\'s so cool','no way','haha ok','yesss','i agree!','😂','keep going!!','this is so fun']]};
+const AMB=['hi from {c} 👋','who else is here at {h}am? lol','love this live ❤️','😍😍😍','omg so many people','where are u from?','turn up the volume pls','can u say hi to me?','first time watching, love it','just got here what did i miss?','🔥🔥🔥','this is the best live rn','how long u been live?','the vibe is immaculate','❤️❤️❤️','hiii!!','following!!','lag?','nice!!','can u hear me?'];
+const CT=['Brazil','Mexico','Japan','the UK','Spain','Texas','Canada','Korea','Philly','Paris','Manila','Jakarta','Germany','Dubai','Nigeria'];
+let topic=null,topicAt=0,lastWords='';
+function text(){
+ let tpl;const fresh=topic&&Date.now()-topicAt<22000;
+ if(fresh&&R(0,10)<7)tpl=P(topic);else tpl=P(AMB);
+ let t=tpl.replace('{n}',me.name).replace('{c}',P(CT)).replace('{h}',R(1,12));
+ if(R(0,6)===0)t+=' '+P(['😭','🔥','❤️','😂','💀','🥹']);
+ if(R(0,5)===0)t=t.toLowerCase();return t}
+function narrate(s){
+ s=(s||'').trim();if(!s)return;lastWords=s;
+ let hit=null;for(const k of Object.keys(T)){if(k!=='gen'&&T[k][0].test(s)){hit=T[k][1];break}}
+ topic=hit||T.gen[1];topicAt=Date.now();
+ const n=R(3,6);for(let i=0;i<n;i++)setTimeout(()=>botSay(),R(900,4500)+i*500);
+ if(R(0,2)===0)setTimeout(()=>{const b=P(bots);const w=s.split(/\s+/).filter(x=>x.length>3);const k=w.length?P(w):'that';addC(b,P(['wait '+k+'?? omg',k+' 😭😭','did u say '+k+'?','lol '+k+' 💀','okay but '+k+' tho']))},R(2000,5000))}
+function botSay(){addC(P(bots),text());if(R(0,3)===0)heart()}
+/* UI */
+function addC(b,t,cls){const d=document.createElement('div');d.className='c '+(cls||'');d.innerHTML='<img alt=""><div><div class="n"></div><div class="t"></div></div>';d.querySelector('img').src=b.a;d.querySelector('.n').textContent=b.n;d.querySelector('.t').textContent=t;const c=$('chat');c.appendChild(d);while(c.children.length>4)c.firstChild.remove();[...c.children].forEach((el,i,a)=>{const k=a.length-1-i;el.style.opacity=k<2?1:Math.max(.45,1-(k-1)*.25)})}
+function heart(){const h=document.createElement('div');h.className='h';const r=R(0,9),f=r<2?'#ff4d6d':r<6?'rgba(255,255,255,.8)':'rgba(255,255,255,.4)',s=R(16,28);h.innerHTML='<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="'+f+'"><path d="M12 21.5S2.5 15.300 2.500 8.800A5.300 5.300 0 0112 6a5.300 5.300 0 019.500 2.800C21.500 15.300 12 21.500 12 21.500z"/></svg>';h.style.left=R(0,22)+'px';h.style.setProperty('--dx',R(-18,18)+'px');$('hearts').appendChild(h);setTimeout(()=>h.remove(),3200)}
+function fmt(n){n=Math.floor(n);if(n<1e3)return''+n;if(n<1e6)return(Math.floor(n/100)/10)+'K';return(Math.floor(n/1e5)/10)+'M'}
+let viewers=0,mult=1,timers=[],stream=null;
+function vtick(){const add=R(3,100)*mult;viewers=Math.min(999.9e6,viewers+add);$('vc').textContent=fmt(viewers);
+ if(viewers>=999.9e6){$('vc').textContent='999.9M'}
+ timers.push(setTimeout(vtick,R(3000,8000)))}
+function chatLoop(){const rate=Math.max(700,2600-Math.log10(viewers+10)*250);botSay();timers.push(setTimeout(chatLoop,R(rate*.5,rate*1.4)))}
+function heartLoop(){heart();timers.push(setTimeout(heartLoop,R(250,1100)))}
+function joinLoop(){if(R(0,2)===0){const b=P(bots);addC(b,'joined','sys')}timers.push(setTimeout(joinLoop,R(5000,12000)))}
+async function media(kind){try{if(stream)stream.getTracks().forEach(t=>t.stop());stream=kind==='scr'?await navigator.mediaDevices.getDisplayMedia({video:true}):await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:true});$('bg').srcObject=stream;if(!rec&&kind!=='scr')$('mic').click()}catch(e){addC({n:'kipa',a:av('k','emoji')},'Camera/screen not available here – use the text box to tell the bots what\'s happening.','sys')}}
+$('go').onclick=()=>{me.name=$('un').value.trim()||'kipa_user';try{localStorage.setItem('kipa',JSON.stringify(me))}catch(e){}
+ mkBots();mult=+$('spd').value;viewers=R(5,40);$('tpp').src=me.pic;$('tun').textContent=me.name;$('vc').textContent=fmt(viewers);
+ $('setup').classList.remove('on');$('live').classList.add('on');$('ctl').classList.add('on');media('cam');$('chat').innerHTML='';
+ timers.push(setTimeout(vtick,R(3000,8000)));timers.push(setTimeout(chatLoop,1500));heartLoop();joinLoop();
+ setTimeout(()=>{topic=T.hi[1];topicAt=Date.now();for(let i=0;i<4;i++)setTimeout(botSay,i*700)},800)};
+$('end').onclick=()=>{timers.forEach(clearTimeout);timers=[];if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;$('bg').srcObject=null}stopRec();$('ctl').classList.remove('on');$('live').classList.remove('on');$('setup').classList.add('on')};
+$('say').addEventListener('keydown',e=>{if(e.key==='Enter'){narrate($('say').value);$('say').value=''}});
+function sendMine(){const v=$('cm').value.trim();if(!v)return;addC({n:me.name,a:me.pic},v,'me');$('cm').value='';narrate(v)}
+$('snd').onclick=sendMine;$('cm').addEventListener('keydown',e=>{if(e.key==='Enter')sendMine()});
+$('hrt').onclick=()=>{for(let i=0;i<4;i++)setTimeout(heart,i*80)};
+$('cam').onclick=()=>media('cam');$('scr').onclick=()=>media('scr');
+let rec=null;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function stopRec(){if(rec){try{rec.onend=null;rec.stop()}catch(e){}rec=null}$('mic').classList.remove('rec')}
+$('mic').onclick=()=>{if(rec)return stopRec();if(!SR){addC({n:'kipa',a:av('k','emoji')},'Voice not supported in this browser – type in the box instead.','sys');return}
+ rec=new SR();rec.continuous=true;rec.interimResults=false;rec.onresult=e=>{narrate(e.results[e.results.length-1][0].transcript)};rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')stopRec()};rec.onend=()=>{if(rec){try{rec.start()}catch(e){}}};try{rec.start();$('mic').classList.add('rec')}catch(e){rec=null}};
+(async()=>{try{const s=await navigator.mediaDevices.getUserMedia({video:true,audio:true});s.getTracks().forEach(t=>t.stop());$('st').textContent='camera & mic ready ✓'}catch(e){$('st').textContent='allow camera & mic in your browser to let bots react'}})();
+</script></body></html>
